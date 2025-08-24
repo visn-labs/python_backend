@@ -1,0 +1,1 @@
+"""Hybrid keyframe extraction package."""
