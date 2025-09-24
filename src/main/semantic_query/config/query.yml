@@ -1,0 +1,80 @@
+# Query-time configuration (generic across domains)
+
+# Default top-k for initial vector similarity retrieval
+initial_top_k: 50
+text_embedding_model: "openai/clip-vit-base-patch32"
+
+# Max final keyframes to pass to temporal clustering (after reasoning filter)
+max_confirmed: 200
+
+# Directory containing keyframe image files (injected by unified pipeline if omitted)
+keyframes_dir: "C:/Users/Lenovo/OneDrive/Desktop/insights/output_dir"
+
+# NOTE: No hardcoded semantic assumptions (time-of-day, seasons, weather, etc.).
+# Dynamic extraction is delegated to an interpreter (LLM) layer defined below.
+
+# Interpreter configuration (dynamic constraint extraction)
+interpreter:
+  enabled: true
+  provider: gemini            # gemini | stub | custom
+  api_key_env: GEMINI_API_KEY # environment variable to read
+  model: gemini-2.5-flash
+  system_prompt: |
+    You extract structured constraints from a natural language video query.
+    Return strict JSON with keys: "primary_query" (string),
+    "time_windows" (list of objects with start/end HH:MM:SS),
+    "seasons", "weather", "environment", "entities", "actions", "other_constraints" (lists of strings).
+    Use empty lists when absent. Do not infer vague times unless explicitly stated.
+  user_wrapper: |
+    Query: "${query}"
+    Extract constraints.
+  stub_max_time_windows: 0
+
+# Temporal clustering parameters
+cluster:
+  # Max gap (seconds) between adjacent timestamps to still belong to same event
+  max_gap_seconds: 6
+  # Minimum distinct frames required to form a cluster (1 = any isolated frame becomes event)
+  min_frames: 1
+
+# Reasoning filter VLM placeholder settings
+reasoning:
+  enabled: true
+  provider: gemini      # gemini | stub
+  model: gemini-1.5-pro
+  api_key_env: GEMINI_API_KEY
+  prompt_template: |
+    You are an assistant verifying typical CCTV footage visual evidence.
+    You are given the keyframes which are being extracted from the specific CCTV camera.
+    Analyse the keyframes carefully, check for objects present, scenario being captured, background and understand the context of the video.
+    Use the question that's being provided to focus on specifics in the keyframes
+    After you understand the context of the video based on the given question, perform the following task.
+    Task: For the provided image, answer the question if the image is relevant and what you understand from the query by matching the context of the video.:
+    "${question}"
+    Be concise and precise, stick to the context.
+
+# Final packaging template
+packaging:
+  system_preamble: |
+    You are a helpful video analysis assistant. Answer the user's question strictly based on the provided structured evidence.
+  answer_instructions: |
+    Provide a concise factual answer supporting the reasoning that you have performed. Do not speculate beyond the evidence.
+
+# NOTE: No deterministic local time parsing. Even explicit ranges like "09:00-10:30"
+# are treated as raw text unless the interpreter LLM returns structured time_windows.
+# This keeps ALL temporal interpretation centralized in the LLM layer.
+
+# Final answer generation (stitch evidence + VLM audit). Enabled by default.
+answer:
+  enabled: true
+  provider: gemini        # gemini | stub
+  api_key_env: GEMINI_API_KEY
+  model: gemini-1.5-pro
+  # Generic enrichment controls
+  mode: descriptive              # auto | binary | enumerative | descriptive
+  max_frames_listed: 1024   # Cap number of frame timestamps listed explicitly
+  enumeration_hint: true  # If true and query asks 'what/which/list' encourage listing entities
+  include_events: true    # Include event breakdown in prompt
+  include_frame_table: true  # Provide a compact frame table section
+  stub_detail: high  # (internal) influences richness of stub fallback formatting
+  natural_style: true  # Enable neutral natural wording without domain heuristics

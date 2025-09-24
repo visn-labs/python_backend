@@ -1,0 +1,16 @@
+###################################################################################################
+# DEBUG / DIAGNOSTICS CONFIGURATION
+# -------------------------------------------------------------------------------------------------
+# Enables optional artifacts and verbosity controls.
+###################################################################################################
+
+# Save Stage 1 / Stage 2 foreground masks for each accepted keyframe.
+save_debug_masks: false
+
+# Where to store motion masks (created if absent).
+mask_output_dir: "hybrid_keyframes/masks"
+
+# Planned log level granularity (future extensibility): INFO | DEBUG | WARN | ERROR.
+log_level: INFO
+
+###################################################################################################

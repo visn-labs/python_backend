@@ -1,0 +1,42 @@
+run:
+  extract: true
+  index: true
+  query: true
+
+llm:
+  provider: gemini
+  api_key_env: GEMINI_API_KEY  # Set this env var at runtime (do not commit real key)
+  interpreter_model: gemini-1.5-pro
+  reasoning_model: gemini-1.5-flash
+
+keyframe:
+  video_path: sample_video.mp4
+  output_dir: hybrid_keyframes/output
+  min_distance_seconds: 1.0
+  high_motion_threshold: 5000
+  low_motion_threshold: 200
+  progress_bar: false
+
+indexing:
+  keyframes_dir: hybrid_keyframes/output
+  vector_store: inmem
+  vector_store_dir: .vector_store
+  patterns: ['*.jpg']
+  embed_batch_size: 16
+  image_embedding_model: openai/clip-vit-base-patch32
+  text_embedding_model: openai/clip-vit-base-patch32
+  log_level: INFO
+
+query:
+  interpreter:
+    enabled: true
+  reasoning:
+    enabled: true
+  cluster:
+    max_gap_seconds: 6
+    min_frames: 1
+  packaging:
+    system_preamble: 'You are an assistant summarizing video events.'
+    answer_instructions: 'Provide concise narrative.'
+  initial_top_k: 50
+  max_confirmed: 200

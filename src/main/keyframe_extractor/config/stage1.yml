@@ -1,0 +1,31 @@
+###################################################################################################
+# STAGE 1 CONFIGURATION (FAST MOTION FILTER)
+# -------------------------------------------------------------------------------------------------
+# Stage 1 uses MOG2 foreground pixel count to quickly classify frames:
+#   motion <= low_motion_threshold      -> ignore
+#   motion >= high_motion_threshold     -> accept keyframe (skip Stage 2)
+#   else                                -> borderline; run Stage 2 (texture)
+# Counts depend on resolution. Re-tune thresholds if you change resize_scale or input size.
+###################################################################################################
+
+# Threshold to enter "maybe" zone. Lower => more Stage 2 calls (slower, more sensitive).
+low_motion_threshold: 5000
+
+# Threshold to instantly accept keyframe. Lower => more keyframes; higher => stricter.
+high_motion_threshold: 10000
+
+# Background subtractor (MOG2) parameters for Stage 1 (color/gray domain).
+mog_color:
+  # Number of frames for background history (higher = smoother adaptation, slower to change).
+  history: 180  # Variance threshold; higher -> less sensitive (fewer foreground pixels).
+  varThreshold: 64.0
+  # Keep shadows flagged; typically okay since we just count foreground pixels.
+  detectShadows: true
+
+# Morphological cleaning (open+close) to reduce noise and specks.
+apply_morphology: true
+
+# Kernel size (odd integer). Increase (5) for noisier scenes.
+morph_kernel_size: 3
+
+###################################################################################################

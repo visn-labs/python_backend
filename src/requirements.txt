@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+numpy
+opencv-python
+tqdm
+PyYAML
+requests
+Pillow
+google-generativeai

@@ -1,0 +1,54 @@
+###################################################################################################
+# BASE CONFIGURATION
+# -------------------------------------------------------------------------------------------------
+# Core runtime behavior shared across all stages. Stage-specific knobs live in stage1.yml, stage2.yml,
+# and debug / diagnostics in debug.yml. These files are merged (base first, later overrides win).
+#
+# Tuning overview:
+#   SPEED  : resize_scale < 1.0, frame_step > 1
+#   OUTPUT : min_distance_seconds, thresholds (stage1.yml), max_keyframes
+#   QUALITY: keep resize_scale near 1.0, frame_step = 1
+# Change only a couple settings at once to isolate effects.
+###################################################################################################
+
+# Absolute or relative path to the input video. Prefer a pre-downscaled (e.g., 480p) version.
+video_path: "C:/Users/Lenovo/OneDrive/Desktop/insights_sample_video.mp4"
+
+# Directory for keyframe images (and optional masks). Created if missing.
+output_dir: "C:/Users/Lenovo/OneDrive/Desktop/insights/output_dir"
+
+# Internal scale factor applied after decoding. 1.0 keeps size; 0.5 halves width/height (~4x speed).
+resize_scale: 0.8
+
+# Process every Nth frame. 1 = all frames; 2 = half, etc. Linear speed vs temporal precision trade-off.
+frame_step: 10
+
+# Minimum spacing between saved keyframes (seconds). Prevents near-duplicate frames.
+min_distance_seconds: 1.0
+
+# Convert to grayscale before Stage 1. Recommended unless future color features are added.
+force_grayscale: true
+
+# Output image format: jpg (compressed, small) or png (lossless, larger).
+image_extension: jpg
+
+# JPEG quality 1–100 (effective only if jpg). 85–92 balances quality and size.
+jpeg_quality: 90
+
+# Safety cap on number of keyframes. 0 = unlimited.
+max_keyframes: 0
+
+# Show progress bar (disable for ultra-minimal logging or non-TTY environments).
+progress_bar: true
+
+# Print summary and per-run messages.
+verbose: true
+
+# Adaptive thresholding (online). Legacy fixed thresholds in stage1.yml act as defaults.
+# Flattened keys (no indentation) to avoid YAML tab/indent issues.
+adaptive_enabled: true          # Set false to revert to static thresholds
+adaptive_window_size: 300       # Number of recent motion scores to keep
+adaptive_min_history: 600       # Samples before adaptation activates
+adaptive_k_low: 1.0             # Low threshold = mean + k_low * std
+adaptive_k_high: 3.0            # High threshold = mean + k_high * std
+adaptive_smooth_factor: 0.8     # 0 disables EMA smoothing; else 0..1 (higher = faster react)

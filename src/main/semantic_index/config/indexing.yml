@@ -1,0 +1,51 @@
+# Configuration for offline semantic indexing of keyframes
+# Generic: do not encode domain-specific assumptions.
+
+# Path to directory containing extracted keyframes (images). Required.
+# Must point to the same directory where keyframe extractor writes images.
+# Synchronized with base.yml output_dir.
+keyframes_dir: "C:/Users/Lenovo/OneDrive/Desktop/insights/output_dir"
+
+# Glob pattern(s) for keyframe images.
+patterns: ["*.jpg", "*.png"]
+
+# Regex (with a named group) or simple template to extract video-relative seconds from filename.
+# If regex is provided, it takes precedence. Example matches: frame_0045s.jpg -> 45.0
+# Provide group name 'seconds'.
+filename_seconds_regex: "(?P<seconds>\\d+(?:\\.\\d+)?)s"
+
+# Real-world start time (ISO 8601). If null, real_world_time not computed.
+video_start_time: null  # e.g., "2025-08-26T06:00:00"
+
+# Timezone for interpreting start time (IANA name or offset). Null assumes naive/UTC usage.
+timezone: null
+
+# Vector DB provider: chroma | faiss | inmem
+vector_store: "chroma"
+
+# Storage directory (for providers needing persistence).
+vector_store_dir: ".vector_store"
+
+# Embedding model tag (CLIP variant). Symbolic reference; actual loader maps this to code.
+image_embedding_model: "openai/clip-vit-base-patch32"
+text_embedding_model: "openai/clip-vit-base-patch32"
+
+# Batch size for embedding computation.
+embed_batch_size: 16
+
+# Dimensionality override (optional). If null, infer from model.
+embedding_dim: null
+
+# Metadata fields to include (extensible for domain adaptation) beyond timestamps.
+extra_metadata:
+  include_filename: true
+  include_filesize: true
+
+# Whether to skip images that fail embedding.
+skip_on_error: true
+
+# Commit interval (flush to disk) in number of records.
+flush_interval: 200
+
+# Logging verbosity: DEBUG | INFO | WARN | ERROR
+log_level: INFO

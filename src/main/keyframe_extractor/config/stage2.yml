@@ -1,0 +1,24 @@
+###################################################################################################
+# STAGE 2 CONFIGURATION (TEXTURE CONFIRMATION)
+# -------------------------------------------------------------------------------------------------
+# Runs only for frames in the Stage 1 "maybe" band (between low & high thresholds).
+# Converts frame to an LBP texture map, then applies a second MOG2 model on the texture image.
+# If texture foreground >= high_motion_threshold => accept keyframe.
+###################################################################################################
+
+lbp:
+  # Circular neighborhood radius (1 = 8 neighbors). Larger radius captures coarser patterns.
+  radius: 1
+  # Total sampling points on circle. Often points = 8 * radius for dense sampling.
+  points: 8
+
+mog_texture:
+  # Independent texture-space background model.
+  history: 500
+  varThreshold: 64.0
+  detectShadows: true
+
+# Optional: override Stage 1's high_motion_threshold specifically for texture domain.
+# high_motion_threshold: 5000
+
+###################################################################################################
